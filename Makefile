@@ -1,73 +1,54 @@
-# Compiler type and version, has been set up using brew install gcc
-CXX := g++-15
+# -----------------------------
+# CMake-driven build (macOS)
+# -----------------------------
 
-# Build type (debug by default)
-BUILD_TYPE ?= debug
+BUILD_TYPE ?= Debug
 
-# Compiler flags
-# -Wall warns about many common issues
-# -Wextra enables additional warnings
-# -Wpedantic enforces strict compliance to the C++ standard
-# -Weffc++ enables warnings based on Scott Meyers' "Effective C++" guidelines
-# -Wconversion warns about implicit type conversions that may alter a value
-# -Wsign-conversion warns about implicit conversions between signed and unsigned types
-# -Werror turns all warnings into errors (NOT included here, but can be added if desired)
-CXXFLAGS_COMMON := -std=c++20  -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -Wpedantic -Werror
+# Use clang++ to avoid libc++/libstdc++ mismatch with vcpkg-built deps
+# When using GCC, ensure vcpkg is also using GCC to build dependencies to avoid ABI issues
+CXX ?= /usr/bin/clang++
 
-# Main source file (fixed)
-MAIN := src/main.cpp
-
-# Additional translation units to always compile and link (ADD HERE i.e. src/foo.cpp src/bar.cpp)
-SOURCES :=
-
-# Output directory
+# CMake build directories
 BUILD_DIR := build
+CMAKE_BUILD_DIR := $(BUILD_DIR)/$(shell echo $(BUILD_TYPE) | tr '[:upper:]' '[:lower:]')
 
-# Debug flags - this includes debug symbols and disables optimizations
-CXXFLAGS_DEBUG := -g -O0 -DDEBUG
+# vcpkg toolchain (expects VCPKG_ROOT exported in your shell)
+VCPKG_TOOLCHAIN := $(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake
 
-# Release flags - this enables optimizations and disables debug symbols
-CXXFLAGS_RELEASE := -O3 -DNDEBUG
+# App target name from CMakeLists.txt
+APP_TARGET := app
 
-# Select flags based on build type
-ifeq ($(BUILD_TYPE),release)
-	CXXFLAGS := $(CXXFLAGS_COMMON) $(CXXFLAGS_RELEASE)
-	BUILD_DIR := build/release
-else
-	CXXFLAGS := $(CXXFLAGS_COMMON) $(CXXFLAGS_DEBUG)
-	BUILD_DIR := build/debug
-endif
+.PHONY: configure build run test clean format lint
 
-EXE := $(notdir $(basename $(MAIN)))
+# Configure step (generates build files)
+configure:
+	@mkdir -p $(CMAKE_BUILD_DIR)
+	cmake -S . -B $(CMAKE_BUILD_DIR) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DCMAKE_CXX_COMPILER=$(CXX) \
+		-DCMAKE_TOOLCHAIN_FILE="$(VCPKG_TOOLCHAIN)"
 
-# Build the program
-.PHONY: build
-build:
-	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(MAIN) $(SOURCES) -o $(BUILD_DIR)/$(EXE)
+# Build step
+build: configure
+	cmake --build $(CMAKE_BUILD_DIR) -j
 
+# Build and run the app executable
+run: build
+	@./$(CMAKE_BUILD_DIR)/$(APP_TARGET)
 
-# Build and run the program
-.PHONY: run
-run:
-	@$(MAKE) build BUILD_TYPE=$(BUILD_TYPE)
-	@./$(BUILD_DIR)/$(EXE)
+# Build and run tests
+test: build
+	ctest --test-dir $(CMAKE_BUILD_DIR) --output-on-failure
 
-
-# Clean build artifacts and remove build directory. Run using: make clean
-.PHONY: clean
+# Clean build artifacts from build directory
 clean:
-	rm -rf build
+	rm -rf $(BUILD_DIR)
 
-
-.PHONY: format
+# Formatting based on clang-format
 format:
 	find . -type f \( -name "*.cpp" -o -name "*.h" \) -exec clang-format -i {} +
 
-
+# Linting based on clang-tidy
 TIDY_FLAGS = -- -std=c++20
-
-.PHONY: lint
 lint:
 	find . -type f -name "*.cpp" -exec clang-tidy {} $(TIDY_FLAGS) \;
-
