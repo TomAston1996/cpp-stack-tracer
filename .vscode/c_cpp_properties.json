@@ -6,10 +6,10 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "C:/TDM-GCC-64/bin/g++.exe",
+            "compilerPath": "/opt/homebrew/bin/g++-15",
             "cStandard": "c17",
             "cppStandard": "c++20",
-            "intelliSenseMode": "windows-gcc-x64",
+            "intelliSenseMode": "macos-gcc-arm64",
             "compilerArgs": [
                 "-std=c++20"
             ]

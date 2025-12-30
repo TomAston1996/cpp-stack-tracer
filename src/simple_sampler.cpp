@@ -1,20 +1,24 @@
+#include <algorithm>
 #include <iostream>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-struct Sample {
+struct Sample
+{
     double ts;
     std::vector<std::string> stack;
 };
 
-struct Event {
+struct Event
+{
     double ts;
     std::string kind;
     std::string name;
 
-    void PrintDebug() const {
+    void PrintDebug() const
+    {
         std::cout << "Kind: " << kind << "\n";
         std::cout << "Name: " << name << "\n";
         std::cout << "Timestamp: " << ts << "\n";
@@ -22,25 +26,29 @@ struct Event {
     }
 };
 
-
-std::vector<Event> convertToTrace(const std::vector<Sample>& samples)
+std::vector<Event> convertToTrace(const std::vector<Sample> &samples)
 {
     std::vector<Event> result;
     std::vector<std::string> running;
 
-    for (const auto& sample : samples) {
+    for (const auto &sample : samples)
+    {
 
         // 1. End functions that disappeared
         while (!running.empty() &&
-               std::find(sample.stack.begin(), sample.stack.end(), running.back()) == sample.stack.end())
+               std::find(sample.stack.begin(), sample.stack.end(),
+                         running.back()) == sample.stack.end())
         {
             result.push_back(Event{sample.ts, "end", running.back()});
             running.pop_back();
         }
 
         // 2. Start new functions
-        for (const auto& func : sample.stack) {
-            if (std::find(running.begin(), running.end(), func) == running.end()) {
+        for (const auto &func : sample.stack)
+        {
+            if (std::find(running.begin(), running.end(), func) ==
+                running.end())
+            {
                 result.push_back(Event{sample.ts, "start", func});
                 running.push_back(func);
             }
@@ -50,10 +58,8 @@ std::vector<Event> convertToTrace(const std::vector<Sample>& samples)
     return result;
 }
 
-
-
 int main()
- {
+{
 
     Sample s1{7.5, {"main"}};
     Sample s2{9.2, {"main", "my_fn"}};
@@ -63,8 +69,9 @@ int main()
 
     auto events = convertToTrace(samples);
 
-    for (const auto& event : events) {
-        std::cout << event.kind << ", " << event.ts << ", " << event.name << "\n";
+    for (const auto &event : events)
+    {
+        std::cout << event.kind << ", " << event.ts << ", " << event.name
+                  << "\n";
     }
-
- }
+}
