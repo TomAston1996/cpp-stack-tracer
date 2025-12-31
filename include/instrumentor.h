@@ -35,6 +35,7 @@
 #include <fstream>
 #include <string>
 #include <thread>
+#include <mutex>
 
 namespace instrumentation::detail
 {
@@ -96,9 +97,12 @@ class Instrumentor
     void beginSession(const std::string &name,
                       const std::string &filepath = "results.json")
     {
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_currentSessionActive)
         {
-            endSession();
+            endSessionLocked();
         }
 
         m_outputStream.open(
@@ -121,16 +125,8 @@ class Instrumentor
      */
     void endSession()
     {
-        if (!m_currentSessionActive)
-        {
-            return;
-        }
-
-        writeFooter();
-        m_outputStream.close();
-        m_currentSessionActive = false;
-        m_profileCount = 0;
-        m_sessionStartUs = 0;
+        std::lock_guard<std::mutex> lock(m_mutex);
+        endSessionLocked();
     }
 
     /**
@@ -150,6 +146,8 @@ class Instrumentor
      */
     void writeProfile(ProfileResult result)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        
         if (!m_currentSessionActive)
         {
             return;
@@ -184,6 +182,21 @@ class Instrumentor
           m_profileCount(0), m_sessionStartUs(0)
     {
     }
+    
+    /**
+     * @brief locked helpers (assume m_mutex is held)
+     */
+    void endSessionLocked()
+    {
+        if (!m_currentSessionActive)
+            return;
+
+        writeFooter();
+        m_outputStream.close();
+        m_currentSessionActive = false;
+        m_profileCount = 0;
+        m_sessionStartUs = 0;
+    }
 
     /**
      * @brief Write the opening JSON header for the trace output.
@@ -210,6 +223,8 @@ class Instrumentor
     }
 
   private:
+    std::mutex m_mutex;
+
     InstrumentationSession m_session{};
     bool m_currentSessionActive{false};
     std::ofstream m_outputStream;
