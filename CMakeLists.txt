@@ -26,7 +26,6 @@ add_compile_definitions(
 
 add_executable(app
   src/main.cpp
-  src/foo.cpp
 )
 
 # Header files are in the include/ directory
@@ -37,8 +36,7 @@ enable_testing()
 find_package(GTest CONFIG REQUIRED)
 
 add_executable(tests
-  tests/foo_test.cpp
-  src/foo.cpp
+  tests/main_test.cpp
 )
 target_include_directories(tests PRIVATE include)
 target_link_libraries(tests PRIVATE GTest::gtest GTest::gtest_main)
