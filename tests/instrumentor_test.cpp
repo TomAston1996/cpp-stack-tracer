@@ -34,7 +34,7 @@ static int countEvents(const std::string &json)
 class InstrumentorTest : public ::testing::Test
 {
   protected:
-    std::filesystem::path outPath;
+    std::filesystem::path outPath{};
 
     void SetUp() override
     {

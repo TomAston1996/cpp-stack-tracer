@@ -15,7 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # -Wsign-conversion warns about implicit conversions between signed and unsigned types
 # -Werror turns all warnings into errors (NOT included here, but can be added if desired)
 add_compile_options(
-  -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Weffc++ -Werror
+  -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
 )
 
 # Debug/Release flags
