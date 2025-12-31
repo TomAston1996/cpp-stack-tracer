@@ -37,6 +37,7 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(tests
   tests/main_test.cpp
+  tests/instrumentor_test.cpp
 )
 target_include_directories(tests PRIVATE include)
 target_link_libraries(tests PRIVATE GTest::gtest GTest::gtest_main)

@@ -180,12 +180,10 @@ class Instrumentor
 
   private:
     Instrumentor()
-        : m_session{}
-        , m_currentSessionActive(false)
-        , m_outputStream()
-        , m_profileCount(0)
-        , m_sessionStartUs(0)
-    {}
+        : m_session{}, m_currentSessionActive(false), m_outputStream(),
+          m_profileCount(0), m_sessionStartUs(0)
+    {
+    }
 
     /**
      * @brief Write the opening JSON header for the trace output.
@@ -222,11 +220,11 @@ class Instrumentor
 class InstrumentationTimer
 {
   public:
-    InstrumentationTimer(const InstrumentationTimer&) = delete;
-    InstrumentationTimer& operator=(const InstrumentationTimer&) = delete;
-    InstrumentationTimer(InstrumentationTimer&&) = delete;
-    InstrumentationTimer& operator=(InstrumentationTimer&&) = delete;
-    
+    InstrumentationTimer(const InstrumentationTimer &) = delete;
+    InstrumentationTimer &operator=(const InstrumentationTimer &) = delete;
+    InstrumentationTimer(InstrumentationTimer &&) = delete;
+    InstrumentationTimer &operator=(InstrumentationTimer &&) = delete;
+
     /**
      * @brief Start a scoped instrumentation timer.
      *
