@@ -1,3 +1,11 @@
+#*+-------------------------------------------------------------------------+
+# |             CPP Stack Tracer                                            |
+# |                                                                         |
+# |  https://github.com/TomAston1996/cpp-stack-tracer                       |
+# |                                                                         |
+# | Repo Owner: Tom Aston                                                   |
+# +-------------------------------------------------------------------------+
+
 cmake_minimum_required(VERSION 3.20)
 project(cpp_stack_tracer LANGUAGES CXX)
 
